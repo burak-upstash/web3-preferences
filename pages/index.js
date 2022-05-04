@@ -33,12 +33,11 @@ async function connect() {
 export default function Home() {
 
   const [web3, setWeb3] = useState(null)
-  const [address, setAddress] = useState(null)
+  const [accountAddress, setAccountAddress] = useState(null)
 
   // const [textPreference, setTextPreference] = useState("big")
   const [themePreference, setThemePreference] = useState("light")
 
-  const [tempAddress, setTempAddress] = useState("randomID")
   const [pixelPreference, setPixelPreference] = useState("10")
 
   const [userSettings, setUserSettings] = useState(null)
@@ -46,28 +45,28 @@ export default function Home() {
   useEffect(() => {
     window.ethereum ?
       ethereum.request({ method: "eth_requestAccounts" }).then((accounts) => {
-        if (address) {
-          console.log("address:", address)
+        if (accountAddress) {
+          console.log("accountAddress:", accountAddress)
         }
         else {
           console.log("accounts:", accounts)
-          setAddress(accounts[0])
+          setAccountAddress(accounts[0])
           let w3 = new Web3(ethereum)
           setWeb3(w3)
         }
 
       }).catch((err) => console.log(err))
       : console.log("Please install MetaMask")
-  }, [address])
+  }, [accountAddress])
 
 
 
   async function setPreferences(e) {
-    if (address) {
+    if (accountAddress) {
       const res = await fetch(`/api/store`, {
         method: "POST",
         body: JSON.stringify({
-          accountID: address,
+          accountID: accountAddress,
           // textPreference: textPreference, 
           themePreference: themePreference,
           pixelPreference: pixelPreference,
@@ -77,19 +76,23 @@ export default function Home() {
       console.log("Set res:", data)
     }
     else {
-      console.log("No account address is given", address)
+      console.log("No account accountAddress is given", accountAddress)
     }
 
   }
 
   async function getPreferences(e) {
-    const res = await fetch(`/api/fetch/${tempAddress}`, { method: "GET" })
-    const data = await res.json()
-    console.log("get res:", data.result)
-    console.log("theme:", data.result.themePreference)
+    if (accountAddress) {
+      const res = await fetch(`/api/fetch/${accountAddress}`, { method: "GET" })
+      const data = await res.json()
+      console.log("get res:", data.result)
+      console.log("theme:", data.result.themePreference)
 
-    setUserSettings(data.result)
-
+      setUserSettings(data.result)
+    }
+    else{
+      console.log("No account connected yet!")
+    }
   }
 
   function handleOption(e) {
