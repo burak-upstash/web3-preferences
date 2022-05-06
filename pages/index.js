@@ -9,70 +9,38 @@ import { useState, useEffect } from 'react'
 import Web3 from 'web3'
 
 import { Button } from '@mui/material'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
-import { orange, green } from '@mui/material/colors'
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: orange[400],
-    },
-    secondary: {
-      main: green[400],
-    }
-  }
-})
-// async function connect() {
-
-//   window.ethereum ?
-//     ethereum.request({ method: "eth_requestAccounts" }).then((accounts) => {
-//       if (accountAddress) {
-//         console.log("accountAddress:", accountAddress)
-//       }
-//       else {
-//         console.log("accounts:", accounts)
-//         setAccountAddress(accounts[0])
-//         let w3 = new Web3(ethereum)
-//         setWeb3(w3)
-//       }
-
-//     }).catch((err) => console.log(err))
-//     : console.log("Please install MetaMask")
-
-
-//   console.log("window.ethereum:", window.ethereum)
-
-//   const provider = await detectEthereumProvider()
-//   console.log("provider:", provider)
-
-//   if (provider) {
-
-//     console.log('Ethereum successfully detected!')
-
-//     const chainId = await provider.request({
-//       method: 'eth_chainId'
-//     })
-
-//     console.log("chainId:", chainId)
-//   } else {
-
-//     console.error('Please install MetaMask!', error)
-//   }
-// }
 
 
 export default function Home() {
 
-  const [web3, setWeb3] = useState(null)
+  // const [web3, setWeb3] = useState(null)
   const [accountAddress, setAccountAddress] = useState(null)
 
   // const [textPreference, setTextPreference] = useState("big")
   const [themePreference, setThemePreference] = useState("light")
-
   const [pixelPreference, setPixelPreference] = useState("10")
 
   const [userSettings, setUserSettings] = useState(null)
   const [chainID, setChainID] = useState(null)
 
+  useEffect(() => {
+    checkConnection()
+    getPreferences()
+    // return getPreferences()
+  }, [accountAddress])
+
+  // useEffect(() => {
+    
+  // }, [])
+
+  async function checkConnection() {
+    ethereum
+      .request({ method: 'eth_accounts' })
+      .then(accounts => {
+        console.log(setAccountAddress(accounts[0]))
+      })
+      .catch(console.error);
+  }
 
   async function connect() {
     window.ethereum ?
@@ -83,8 +51,8 @@ export default function Home() {
         else {
           console.log("accounts:", accounts)
           setAccountAddress(accounts[0])
-          let w3 = new Web3(ethereum)
-          setWeb3(w3)
+          // let w3 = new Web3(ethereum)
+          // setWeb3(w3)
         }
 
       }).catch((err) => console.log(err))
@@ -99,35 +67,18 @@ export default function Home() {
     if (provider) {
 
       console.log('Ethereum successfully detected!')
-
       const chainID = await provider.request({
         method: 'eth_chainId'
       })
 
       console.log("chainID:", chainID)
       setChainID(chainID)
+      getPreferences()
     } else {
 
       console.error('Please install MetaMask!', error)
     }
   }
-
-  // useEffect(() => {
-  //   window.ethereum ?
-  //     ethereum.request({ method: "eth_requestAccounts" }).then((accounts) => {
-  //       if (accountAddress) {
-  //         console.log("accountAddress:", accountAddress)
-  //       }
-  //       else {
-  //         console.log("accounts:", accounts)
-  //         setAccountAddress(accounts[0])
-  //         let w3 = new Web3(ethereum)
-  //         setWeb3(w3)
-  //       }
-
-  //     }).catch((err) => console.log(err))
-  //     : console.log("Please install MetaMask")
-  // }, [accountAddress])
 
   async function setPreferences(e) {
     if (accountAddress) {
@@ -146,7 +97,6 @@ export default function Home() {
     else {
       console.log("No account accountAddress is given", accountAddress)
     }
-
   }
 
   async function getPreferences(e) {
@@ -177,30 +127,29 @@ export default function Home() {
   console.log("user settings", userSettings)
 
   return (
+    <div className={styles.container}>
 
-    <ThemeProvider theme={theme}>
-      <div className={styles.container}>
+      <h2>{"Web3 Preferences Holder"}</h2>
+      <p>
+        {"Lets you keep user preferences on cross-websites"}
+      </p>
+      <Button variant="contained" onClick={connect}>Connect Metamask</Button>
 
-        <Button variant="contained" onClick={connect}>Connect Metamask</Button>
-        <Button variant="contained" onClick={connect} color="secondary">Connect Metamask</Button>
+      <h2>Current Chain ID: {chainID}</h2>
 
-        <h1>hi</h1>
-        <h2>Chain ID: {chainID}</h2>
-        <button onClick={connect}> Connect Metamask </button>
+      <button onClick={setPreferences}> Set foo bar </button>
+      <button onClick={getPreferences}> Get foo </button>
 
-        <button onClick={setPreferences}> Set foo bar </button>
-        <button onClick={getPreferences}> Get foo </button>
+      <button onClick={handleDarkMode}> Dark mode </button>
+      <select onClick={handleOption}>
+        <option value="10">10px</option>
+        <option value="20">20px</option>
+      </select>
 
-        <button onClick={handleDarkMode}> Dark mode </button>
-        <select onClick={handleOption}>
-          <option value="10">10px</option>
-          <option value="20">20px</option>
-        </select>
+      <p>Sample Component/Page:</p>
+      <Showcase userSettings={userSettings} />
 
-        <Showcase userSettings={userSettings} />
+    </div>
 
-      </div>
-
-    </ThemeProvider>
   )
 }
