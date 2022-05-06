@@ -8,26 +8,56 @@ import detectEthereumProvider from '@metamask/detect-provider'
 import { useState, useEffect } from 'react'
 import Web3 from 'web3'
 
-async function connect() {
-  console.log("window.ethereum:", window.ethereum)
-
-  const provider = await detectEthereumProvider()
-  console.log("provider:", provider)
-
-  if (provider) {
-
-    console.log('Ethereum successfully detected!')
-
-    const chainId = await provider.request({
-      method: 'eth_chainId'
-    })
-
-    console.log("chainId:", chainId)
-  } else {
-
-    console.error('Please install MetaMask!', error)
+import { Button } from '@mui/material'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { orange, green } from '@mui/material/colors'
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: orange[400],
+    },
+    secondary: {
+      main: green[400],
+    }
   }
-}
+})
+// async function connect() {
+
+//   window.ethereum ?
+//     ethereum.request({ method: "eth_requestAccounts" }).then((accounts) => {
+//       if (accountAddress) {
+//         console.log("accountAddress:", accountAddress)
+//       }
+//       else {
+//         console.log("accounts:", accounts)
+//         setAccountAddress(accounts[0])
+//         let w3 = new Web3(ethereum)
+//         setWeb3(w3)
+//       }
+
+//     }).catch((err) => console.log(err))
+//     : console.log("Please install MetaMask")
+
+
+//   console.log("window.ethereum:", window.ethereum)
+
+//   const provider = await detectEthereumProvider()
+//   console.log("provider:", provider)
+
+//   if (provider) {
+
+//     console.log('Ethereum successfully detected!')
+
+//     const chainId = await provider.request({
+//       method: 'eth_chainId'
+//     })
+
+//     console.log("chainId:", chainId)
+//   } else {
+
+//     console.error('Please install MetaMask!', error)
+//   }
+// }
 
 
 export default function Home() {
@@ -41,8 +71,10 @@ export default function Home() {
   const [pixelPreference, setPixelPreference] = useState("10")
 
   const [userSettings, setUserSettings] = useState(null)
+  const [chainID, setChainID] = useState(null)
 
-  useEffect(() => {
+
+  async function connect() {
     window.ethereum ?
       ethereum.request({ method: "eth_requestAccounts" }).then((accounts) => {
         if (accountAddress) {
@@ -57,9 +89,45 @@ export default function Home() {
 
       }).catch((err) => console.log(err))
       : console.log("Please install MetaMask")
-  }, [accountAddress])
 
 
+    console.log("window.ethereum:", window.ethereum)
+
+    const provider = await detectEthereumProvider()
+    console.log("provider:", provider)
+
+    if (provider) {
+
+      console.log('Ethereum successfully detected!')
+
+      const chainID = await provider.request({
+        method: 'eth_chainId'
+      })
+
+      console.log("chainID:", chainID)
+      setChainID(chainID)
+    } else {
+
+      console.error('Please install MetaMask!', error)
+    }
+  }
+
+  // useEffect(() => {
+  //   window.ethereum ?
+  //     ethereum.request({ method: "eth_requestAccounts" }).then((accounts) => {
+  //       if (accountAddress) {
+  //         console.log("accountAddress:", accountAddress)
+  //       }
+  //       else {
+  //         console.log("accounts:", accounts)
+  //         setAccountAddress(accounts[0])
+  //         let w3 = new Web3(ethereum)
+  //         setWeb3(w3)
+  //       }
+
+  //     }).catch((err) => console.log(err))
+  //     : console.log("Please install MetaMask")
+  // }, [accountAddress])
 
   async function setPreferences(e) {
     if (accountAddress) {
@@ -90,7 +158,7 @@ export default function Home() {
 
       setUserSettings(data.result)
     }
-    else{
+    else {
       console.log("No account connected yet!")
     }
   }
@@ -109,23 +177,30 @@ export default function Home() {
   console.log("user settings", userSettings)
 
   return (
-    <div className={styles.container}>
 
-      <h1>hi</h1>
-      <h2>Chain ID: { }</h2>
-      <button onClick={connect}> Connect Metamask </button>
+    <ThemeProvider theme={theme}>
+      <div className={styles.container}>
 
-      <button onClick={setPreferences}> Set foo bar </button>
-      <button onClick={getPreferences}> Get foo </button>
+        <Button variant="contained" onClick={connect}>Connect Metamask</Button>
+        <Button variant="contained" onClick={connect} color="secondary">Connect Metamask</Button>
 
-      <button onClick={handleDarkMode}> Dark mode </button>
-      <select onClick={handleOption}>
-        <option value="10">10px</option>
-        <option value="20">20px</option>
-      </select>
+        <h1>hi</h1>
+        <h2>Chain ID: {chainID}</h2>
+        <button onClick={connect}> Connect Metamask </button>
 
-      <Showcase userSettings={userSettings} />
+        <button onClick={setPreferences}> Set foo bar </button>
+        <button onClick={getPreferences}> Get foo </button>
 
-    </div>
+        <button onClick={handleDarkMode}> Dark mode </button>
+        <select onClick={handleOption}>
+          <option value="10">10px</option>
+          <option value="20">20px</option>
+        </select>
+
+        <Showcase userSettings={userSettings} />
+
+      </div>
+
+    </ThemeProvider>
   )
 }
