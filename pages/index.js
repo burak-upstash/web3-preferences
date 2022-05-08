@@ -1,12 +1,9 @@
-import Head from 'next/head'
-import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
 import Showcase from '../components/sampleComponent'
 
 import detectEthereumProvider from '@metamask/detect-provider'
 import { useState, useEffect } from 'react'
-import Web3 from 'web3'
 
 import { Button, TextField } from '@mui/material'
 
