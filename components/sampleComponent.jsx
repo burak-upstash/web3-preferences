@@ -1,22 +1,17 @@
 
 import React, { useContext } from "react";
+import { useState, useEffect } from 'react'
 
 import { Button } from '@mui/material'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
-import { orange, green, grey, blueGrey, blue } from '@mui/material/colors'
-import { useState } from 'react'
+import { orange, grey } from '@mui/material/colors'
+import { borderColor } from "@mui/material/node_modules/@mui/system";
 
 const lightTheme = createTheme({
   palette: {
     primary: {
       main: grey[400],
     },
-    secondary: {
-      main: green[400],
-    },
-    dark: {
-      main: orange[400],
-    }
   }
 })
 
@@ -25,55 +20,59 @@ const darkTheme = createTheme({
     primary: {
       main: orange[400],
     },
-    secondary: {
-      main: green[100],
-    },
-    dark: {
-      main: orange[100],
-    }
   }
 })
 
 export default function Showcase(parameters) {
-  // const { title, description } = useContext(FeedbackContext);
 
-  // const userSettings = JSON.stringify(parameters).userSettings
   const userSettings = parameters.userSettings
-  const [theme, setTheme] = useState(lightTheme)
-  const [themeIsSet, setThemeIsSet] = useState(false)
-
-
-  console.log("stuff", parameters)
+  const [theme, setTheme] = useState("light")
+  const [greetingMessage, setGreetingMessage] = useState("Anonymous Person")
 
   const items = []
   if (userSettings) {
 
     const obj = userSettings[0]
-    console.log(22222222222, userSettings, userSettings["accountID"])
 
     for (const key in userSettings) {
-      console.log(key, userSettings[key])
       items.push(<li key={key}> {key}: {userSettings[key]} </li>)
     }
-    if(!themeIsSet){
-      setTheme(userSettings["themePreference"] == "light" ? lightTheme : darkTheme)
-      setThemeIsSet(true)
+
+    if (userSettings["themePreference"] != theme) {
+      setTheme(userSettings["themePreference"] == "light" ? "light" : "dark")
+    }
+
+    if (!greetingMessage || userSettings["greetingMessage"] != greetingMessage) {
+      if (userSettings["greetingMessage"]) {
+        setGreetingMessage(userSettings["greetingMessage"])
+      }
+      else {
+        setGreetingMessage("patladi")
+      }
     }
   }
 
- 
-
   return (
+    <div>
+      <div style={{
+        padding: 10,
+        margin: 10,
+        backgroundColor: theme == "light" ? "grey" : "orange",
+        border: "solid",
+        borderWidth: "30px",
+        borderColor: theme == "light" ? "#B2B2B2" : "black"
+      }}>
+        <ThemeProvider
+          theme={theme == "light" ? lightTheme : darkTheme}
+        >
 
-    <div style={{ height: 100, margin: 10 }}>
-      <ThemeProvider theme={theme} >
-        <Button color="primary" variant="contained" style={{
-          margin: 10,
-        }}>Some button</Button>
-        {items}
+          <h2>Hi, {greetingMessage}!</h2>
+          <p>User and their preferences:</p>
+          {items}
 
-      </ThemeProvider>
+        </ThemeProvider>
 
+      </div>
     </div>
   );
 }

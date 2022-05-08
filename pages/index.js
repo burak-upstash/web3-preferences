@@ -8,53 +8,39 @@ import detectEthereumProvider from '@metamask/detect-provider'
 import { useState, useEffect } from 'react'
 import Web3 from 'web3'
 
-import { Button } from '@mui/material'
+import { Button, TextField } from '@mui/material'
 
 
 export default function Home() {
 
-  // const [web3, setWeb3] = useState(null)
   const [accountAddress, setAccountAddress] = useState(null)
 
-  // const [textPreference, setTextPreference] = useState("big")
   const [themePreference, setThemePreference] = useState("light")
-  const [pixelPreference, setPixelPreference] = useState("10")
+  const [greetingMessage, setGreetingMessage] = useState("Anonymous Person")
 
   const [userSettings, setUserSettings] = useState(null)
-  const [chainID, setChainID] = useState(null)
 
   useEffect(() => {
     checkConnection()
     getPreferences()
-    // return getPreferences()
   }, [accountAddress])
 
-  // useEffect(() => {
-    
-  // }, [])
 
   async function checkConnection() {
     ethereum
       .request({ method: 'eth_accounts' })
       .then(accounts => {
-        console.log(setAccountAddress(accounts[0]))
+        setAccountAddress(accounts[0])
       })
-      .catch(console.error);
+      .catch(console.error)
   }
 
   async function connect() {
     window.ethereum ?
       ethereum.request({ method: "eth_requestAccounts" }).then((accounts) => {
-        if (accountAddress) {
-          console.log("accountAddress:", accountAddress)
-        }
-        else {
-          console.log("accounts:", accounts)
+        if (!accountAddress) {
           setAccountAddress(accounts[0])
-          // let w3 = new Web3(ethereum)
-          // setWeb3(w3)
         }
-
       }).catch((err) => console.log(err))
       : console.log("Please install MetaMask")
 
@@ -65,34 +51,24 @@ export default function Home() {
     console.log("provider:", provider)
 
     if (provider) {
-
       console.log('Ethereum successfully detected!')
-      const chainID = await provider.request({
-        method: 'eth_chainId'
-      })
-
-      console.log("chainID:", chainID)
-      setChainID(chainID)
       getPreferences()
     } else {
-
       console.error('Please install MetaMask!', error)
     }
   }
 
-  async function setPreferences(e) {
+  async function setPreferences(themePreference, greetingMessage) {
     if (accountAddress) {
       const res = await fetch(`/api/store`, {
         method: "POST",
         body: JSON.stringify({
           accountID: accountAddress,
-          // textPreference: textPreference, 
           themePreference: themePreference,
-          pixelPreference: pixelPreference,
+          greetingMessage: greetingMessage,
         })
       })
       const data = await res.json()
-      console.log("Set res:", data)
     }
     else {
       console.log("No account accountAddress is given", accountAddress)
@@ -101,50 +77,55 @@ export default function Home() {
 
   async function getPreferences(e) {
     if (accountAddress) {
+      console.log("Fetching user preferences...")
       const res = await fetch(`/api/fetch/${accountAddress}`, { method: "GET" })
       const data = await res.json()
-      console.log("get res:", data.result)
-      console.log("theme:", data.result.themePreference)
 
       setUserSettings(data.result)
+      if (data.result) {
+        setThemePreference(data.result.themePreference)
+        setGreetingMessage(data.result.greetingMessage)
+      }
     }
     else {
       console.log("No account connected yet!")
     }
   }
 
-  function handleOption(e) {
-    console.log("handle Option event:", e)
-    console.log("handle Option target:", e.target.value)
-    setPixelPreference(e.target.value)
+  async function handleDarkMode(e) {
+    console.log("themePreference:", themePreference)
+    const newPreference = themePreference == "light" ? "dark" : "light"
+    setThemePreference(newPreference)
+    await setPreferences(newPreference, greetingMessage)
+    await getPreferences()
   }
 
-  function handleDarkMode(e) {
-    setThemePreference(themePreference == "light" ? "dark" : "light")
-    console.log(themePreference)
+  async function takeGreetingMessage(e) {
+    if (e.keyCode == 13) {
+      const message = e.target.value
+      setGreetingMessage(message)
+      console.log(message)
+      await setPreferences(themePreference, message)
+      await getPreferences()
+      e.target.value = ""
+    }
   }
-
-  console.log("user settings", userSettings)
 
   return (
     <div className={styles.container}>
 
-      <h2>{"Web3 Preferences Holder"}</h2>
-      <p>
-        {"Lets you keep user preferences on cross-websites"}
-      </p>
+      <h2>Web3 Preferences Holder</h2>
       <Button variant="contained" onClick={connect}>Connect Metamask</Button>
+      <p>
+        Lets you keep user preferences on cross-websites
+      </p>
+      <br/>
+      <p>For example, take a greeter message from user.</p>
+      <TextField label="Call me..." variant="outlined" size="small" onKeyDown={takeGreetingMessage} />
+      <br />
+      <br />
 
-      <h2>Current Chain ID: {chainID}</h2>
-
-      <button onClick={setPreferences}> Set foo bar </button>
-      <button onClick={getPreferences}> Get foo </button>
-
-      <button onClick={handleDarkMode}> Dark mode </button>
-      <select onClick={handleOption}>
-        <option value="10">10px</option>
-        <option value="20">20px</option>
-      </select>
+      <Button onClick={handleDarkMode} variant="contained" size="small" style={{ backgroundColor: "#3D3B3B" }} > Switch Dark Mode </Button>
 
       <p>Sample Component/Page:</p>
       <Showcase userSettings={userSettings} />
