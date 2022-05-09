@@ -2,7 +2,8 @@
 This project keeps user preferences by the addresses from the wallets, used for connecting to applications.
 
 Uses Upstash Redis for storage.
-
+# Deploy to Vercel
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fburak-upstash%2Fweb3-preferences&integration-ids=oac_V3R1GIpkoJorr6fqyiwdhl17)
 ***
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
